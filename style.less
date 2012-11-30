@@ -1,0 +1,110 @@
+body {
+    font-family: Arial;
+    font-size: 12pt;
+    background: #222;
+    margin: 0;
+    padding: 0;
+}
+
+.wrapper {
+    overflow: hidden;
+}
+
+.gallery {
+    margin: 30px 0 0;
+}
+
+.image {
+    display: block;
+    position: relative;
+    margin: 0 auto 0 auto;
+    transition: transform 0.6s;
+    transform: scale(1);
+    transform-style: preserve-3d;
+    transform-origin: left center;
+    perspective: 8px;
+    width: 80%;
+    height: 89%;
+
+    .image_fullscreen { 
+        transform-style: preserve-3d;
+        max-width: 100%;
+        max-height: 100%;
+        display: none;
+    }
+
+    .details, img {
+        backface-visibility: hidden;
+    }
+
+    .details {
+        color: white;
+        background: #444;
+        position: absolute;
+        top: 0; right: 0;
+        height: 84%;
+        width: 90%;
+        transform: rotateY(180deg);
+
+        padding: 5%;
+        //border-bottom: 10px solid #1E1E1E;
+
+        .image_data {
+            width: 50%; 
+            float: left;
+            margin: 0 4% 0 0;
+
+            .thumb {
+                width: 100%;
+            }
+        }
+
+        .url_imgur {
+            display: block;
+            font-size: 15pt;
+            color: white;
+            background: #333;
+            border: none;
+            border-bottom: 2px solid white;
+            padding: 11px;
+            width: 45%;
+
+            &::-moz-selection {
+                background: #258; /* Safari */
+            }
+        }
+    }
+
+
+    &.flipped {
+        transform: scale(.8) translateX(110%) rotateY(180deg);
+    }
+
+    &.uploading {
+        transform: scale(.5) translateX(50%);
+    }
+
+    .progress {
+        .progress_left {
+            width: 100%;
+        }
+        
+        .progress_total {
+        }
+    }
+}
+
+// Various helpers
+.clearfix:after {
+     visibility: hidden;
+     display: block;
+     font-size: 0;
+     content: " ";
+     clear: both;
+     height: 0;
+     }
+.clearfix { display: inline-block; }
+/* start commented backslash hack \*/
+* html .clearfix { height: 1%; }
+.clearfix { display: block; }
+/* close commented backslash hack */
