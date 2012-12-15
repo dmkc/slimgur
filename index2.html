@@ -1,0 +1,50 @@
+<!doctype html5>
+<html>
+    <head>
+        <title>slimgur</title>
+        <meta charset="UTF-8"> 
+        <link rel="stylesheet/less" type="text/css" href="style.less">
+
+        <script src="js/less.js" type="text/javascript"></script>
+        <script src="js/jquery.js" type="text/javascript"></script>
+        <script src="js/app.js" type="text/javascript"></script>
+
+        <script src="js/underscore_1.4.3.js" type="text/javascript"></script>
+        <script src="js/backbone_0.9.9.js" type="text/javascript"></script>
+    </head>
+    <body id="app">
+        <div id="droparea">
+            <!-- file field that's clickable anywhere on the screen -->
+
+            <!-- drag and drop area -->
+            
+        </div>
+        <div id="wrapper">
+            <input type="file" multiple="multiple" 
+                   accept="image/jpeg;image/png;image/gif" 
+                   id="upload_input">
+            <div class="gallery">
+                <div class="image">
+                    <img class="image_fullscreen" alt="" src="">
+                    <div class="details">
+
+                        <div class="details_wrapper clearfix">
+                            <div class="image_data">
+                                <img class="thumb" src="" alt="">
+                            </div>
+
+                            <input class="url_imgur" type="text"
+                            value="http://imgur.com/blah.jpg">
+
+                        </div>
+                    </div>
+                    <div class="progress">
+                        <div class="progress_total"></div>
+                        <canvas class="progress_left" 
+                        width=1024 height=768></canvas>
+                    </div>
+                </div>
+           </div> 
+        </div>
+    </body>
+</html>

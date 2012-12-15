@@ -6,8 +6,14 @@ body {
     padding: 0;
 }
 
-.wrapper {
+#droparea {
     overflow: hidden;
+    width: 100%;
+    height: 100%;
+}
+
+#upload_input {
+    display: none;
 }
 
 .gallery {
@@ -18,7 +24,7 @@ body {
     display: block;
     position: relative;
     margin: 0 auto 0 auto;
-    transition: transform 0.6s;
+    transition: transform 0.4s ease;
     transform: scale(1);
     transform-style: preserve-3d;
     transform-origin: left center;
@@ -30,7 +36,7 @@ body {
         transform-style: preserve-3d;
         max-width: 100%;
         max-height: 100%;
-        display: none;
+        //display: none;
     }
 
     .details, img {
@@ -86,6 +92,7 @@ body {
 
     .progress {
         .progress_left {
+            display: none;
             width: 100%;
         }
         
