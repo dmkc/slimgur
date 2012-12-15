@@ -18,11 +18,11 @@ $(document).ready(function(){
                     window.ondragover = function(e) {e.preventDefault()}
                     window.ondrop = function(e) {
                         e.preventDefault();
-                        settings.file_list = settings.file_list.concat(e.dataTransfer.files);
-                        that.trigger('files:ready');
+                        that.trigger('files:dropped', e);
                     };
 
-                    this.on('files:ready', this.upload, this);
+                    this.on('files:ready',   this.upload, this);
+                    this.on('files:dropped', this.filesDropped, this);
                 },
 
                 events: {
@@ -36,20 +36,29 @@ $(document).ready(function(){
                 
                 // Triggered when user selects files via upload dialogue
                 filesSelected: function(e) {
-                    e.preventDefault();
                     var files = this.uploadInput[0].files;
 
-                    for(var i=0; i<files.length;i++) {
-                        settings.file_list.push(files[i]); 
-                    }
+                    e.preventDefault();
+                    this.addFiles(files);
 
-                    console.log('files selected:', this.uploadInput[0].files); 
+                    console.log('Added some files:', files); 
                     this.trigger('files:ready');
                 },
 
                 filesDropped: function(e) {
+                    console.log("File dropped", e);
+                    this.addFiles(e.dataTransfer.files);
+                    this.upload();
                 },
 
+                // Add files to the array of files to be uploaded
+                addFiles: function(files) {
+                    for(var i=0; i<files.length;i++) {
+                        settings.file_list.push(files[i]); 
+                    }
+                },
+
+                // Upload all files in the settings.file_list array
                 upload: function(){
                     while(settings.file_list.length != 0) {
                         var file = settings.file_list.splice(0,1)[0];
@@ -57,8 +66,7 @@ $(document).ready(function(){
                         // Make sure we don't upload non-images
                         if (!file || !file.type.match(/image.*/)) return;
 
-                        // Let's build a FormData object
-
+                        // Build a formdata object
                         var fd = new FormData();
                         fd.append("image", file); // Append the file
 
@@ -86,8 +94,6 @@ $(document).ready(function(){
 
             SApp = new SUI;
 
-          // file is from a <input> tag or from Drag'n Drop
-          // Is the file an image?
          
         // GUI shit
         $(document).ready(function(){
