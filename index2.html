@@ -24,23 +24,22 @@
             
             <div id="gallery">
                 <div id="image_template" class="image">
-                    <img class="image_fullscreen" alt="Image you uploaded" src="<% link %>">
+                    <img class="image_fullscreen" alt="Image you uploaded" src="<% response.link %>">
                     <div class="details">
 
                         <div class="details_wrapper clearfix">
                             <div class="image_data">
-                                <img class="thumb" alt="Image you uploaded" src="<%= link %>">
+                                <img class="thumb" alt="Image you uploaded" src="<%= response.link %>">
                             </div>
 
                             <input class="url_imgur" type="text"
-                            value="<%= link %>">
+                            value="<%= response.ink %>">
 
                         </div>
                     </div>
                     <div class="progress">
                         <div class="progress_total"></div>
-                        <canvas class="progress_left" 
-                        width=1024 height=768></canvas>
+                        <canvas class="progress_left" width=1024 height=768></canvas>
                     </div>
                 </div>
            </div> 

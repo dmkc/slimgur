@@ -15,10 +15,12 @@ $(document).ready(function(){
                     // empty data URL == needs a thumbnail
                     dataURL: '',
 
-                    status: 0,
-                    deletehash: '',
-                    id: '',
-                    link: ''
+                    response: {
+                        status: 0,
+                        deletehash: '',
+                        id: '',
+                        link: ''
+                    }
                 },
 
                 sync: function(){}
@@ -37,21 +39,62 @@ $(document).ready(function(){
         // A view for a single image 
             ImageView = Backbone.View.extend({
                 template: _.template($('#image_template').html()),
+                events: {
+                    "click": "flipCard"
+                },
 
                 initialize: function() {
-                    this.listenTo(this.model, 'change', this.render)
+                    this.listenTo(this.model, 'change', this.render);
+                    this.on('thumbnail:dataready', this.initProgressMeter, this);
                 },
 
                 render: function() {
-                  this.$el.html(this.template(this.model.toJSON()));
-                  this.$el.addClass('image');
-                  this.imageLarge  = this.$('.image_fullscreen');
-                  this.thumbnail = this.$('.thumb');
+                    if(this.$el.children().length === 0) {
+                        this.$el.html(this.template(this.model.toJSON()));
+                    }
 
-                  this.imageLarge.attr('src', this.model.get('dataURL'));
-                  //this.input = this.$('.edit');
-                  return this;
+                    this.$el.addClass('image');
+                    this.imageLarge  = this.$('.image_fullscreen');
+                    this.thumbnail = this.$('.thumb');
+
+                    this.imageLarge.attr('src', this.model.get('dataURL'));
+                    //this.input = this.$('.edit');
+                    return this;
                 },
+
+                initProgressMeter: function() {
+                    var canvas = this.$('.progress_left')[0],
+                        context = canvas.getContext("2d"),
+                        image = this.$(".image_fullscreen")[0],
+                        image_ratio = image.width/image.height;
+
+                    // Ensure adequate canvas size
+                    canvas.width  = image.width;
+                    canvas.height = image.height;
+
+                    context.drawImage(image, 0, 0);
+
+                    // Render the image black and white
+                    var imgd = context.getImageData(0, 0, 
+                                  image.width, 
+                                  image.height),
+
+                        pix = imgd.data,
+                        luminosity = 0, i=0;
+
+                    // Set each pixel to luminosity
+                    for (i = 0, n = pix.length; i < n; i += 4) {
+                        luminosity = pix[i] * .3 + pix[i+1] * .6 + 
+                            pix[i+2] * .10;
+                        pix[i] = pix[i+1] = pix[i+2] = luminosity;
+                    }
+
+                    context.putImageData(imgd, 0, 0);
+                },
+
+                flipCard: function() {
+                    this.$el.toggleClass('flipped');
+                }
             }),
 
             App = Backbone.View.extend({
@@ -80,7 +123,6 @@ $(document).ready(function(){
                     this.on('files:dropped', this.filesDropped, this);
 
                     this.listenTo(Images, 'add', this.imageAdded);
-                    this.listenTo(Images, 'thumbnailDone', this.thumbnailDone);
                 },
 
 
@@ -136,7 +178,7 @@ $(document).ready(function(){
                         image.set({
                             dataURL: fr.result
                         });
-
+                        view.trigger('thumbnail:dataready')
                     }
 
                     fr.readAsDataURL(image.get('fileObject'));
@@ -171,7 +213,7 @@ $(document).ready(function(){
 
                 // Add files to the array of files to be uploaded
                 addFiles: function(files) {
-                    for(var i=0; i<files.length;i++) {
+                    for(var i=0; i<files.length; i++) {
                         Images.create({ fileObject: files[i] }); 
                     }
                 }
@@ -182,47 +224,5 @@ $(document).ready(function(){
 
             window.Slimgur = new App;
             window.Images  = Images;
-
-         
-        // GUI shit
-        $(document).ready(function(){
-            var canvas = $('.progress_left')[0],
-                context = canvas.getContext("2d"),
-                image = $(".image_fullscreen")[0],
-                image_ratio = image.width/image.height;
-
-            // Ensure adequate canvas size
-            canvas.width  = image.width;
-            canvas.height = image.height;
-
-            /*
-            context.drawImage(image, 0, 0);
-
-            // Render the image black and white
-            var imgd = context.getImageData(0, 0, 
-                          image.width, 
-                          image.height),
-
-                pix = imgd.data,
-                luminosity = 0, i=0;
-
-            // Set each pixel to luminosity
-            for (i = 0, n = pix.length; i < n; i += 4) {
-                luminosity = pix[i] * .3 + pix[i+1] * .6 + 
-                    pix[i+2] * .10;
-                pix[i] = pix[i+1] = pix[i+2] = luminosity;
-            }
-
-            context.putImageData(imgd, 0, 0);
-            */
-
-            $('.image').click(function(){
-                var $this = $(this);
-                $this.toggleClass('flipped');
-
-                $this.find('.url_imgur').select();
-            });
-
-        });
     })();
 });
