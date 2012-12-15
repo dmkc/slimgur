@@ -7,34 +7,33 @@
 
         <script src="js/less.js" type="text/javascript"></script>
         <script src="js/jquery.js" type="text/javascript"></script>
-        <script src="js/app.js" type="text/javascript"></script>
-
         <script src="js/underscore_1.4.3.js" type="text/javascript"></script>
         <script src="js/backbone_0.9.9.js" type="text/javascript"></script>
+
+        <script src="js/app.js" type="text/javascript"></script>
     </head>
     <body id="app">
+        <!-- file field that's clickable anywhere on the screen -->
         <div id="droparea">
-            <!-- file field that's clickable anywhere on the screen -->
-
-            <!-- drag and drop area -->
-            
         </div>
+
         <div id="wrapper">
             <input type="file" multiple="multiple" 
                    accept="image/jpeg;image/png;image/gif" 
                    id="upload_input">
-            <div class="gallery">
-                <div class="image">
-                    <img class="image_fullscreen" alt="" src="">
+            
+            <div id="gallery">
+                <div id="image_template" class="image">
+                    <img class="image_fullscreen" alt="Image you uploaded" src="<% link %>">
                     <div class="details">
 
                         <div class="details_wrapper clearfix">
                             <div class="image_data">
-                                <img class="thumb" src="" alt="">
+                                <img class="thumb" alt="Image you uploaded" src="<%= link %>">
                             </div>
 
                             <input class="url_imgur" type="text"
-                            value="http://imgur.com/blah.jpg">
+                            value="<%= link %>">
 
                         </div>
                     </div>

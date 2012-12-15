@@ -1,60 +1,96 @@
 $(document).ready(function(){
     (function(){
-        // Primary app UI
+        // Some globals
         var settings = {
                 upload_uri: "https://api.imgur.com/3/image",
                 client_id:  "891d1ed77f3ecf4",
                 file_list: []
             },
 
-            SUI = Backbone.View.extend({
-                el: $("#app"),
+        // Model for a single image
+            ImageModel = Backbone.Model.extend({
+                defaults: {
+                    // `File` object for this image
+                    fileObject: undefined,
+                    // empty data URL == needs a thumbnail
+                    dataURL: '',
+
+                    status: 0,
+                    deletehash: '',
+                    id: '',
+                    link: ''
+                },
+
+                sync: function(){}
+            }),
+
+
+            ImageCollection = Backbone.Collection.extend({
+                model: ImageModel,
+                sync: function(){}
+
+            }),
+
+        // Initialize the image collection
+            Images = new ImageCollection,
+
+        // A view for a single image 
+            ImageView = Backbone.View.extend({
+                template: _.template($('#image_template').html()),
 
                 initialize: function() {
-                    var that = this;
-                    this.uploadInput = $('#upload_input');
-
-                    // Bind drag-dropping of files
-                    window.ondragover = function(e) {e.preventDefault()}
-                    window.ondrop = function(e) {
-                        e.preventDefault();
-                        that.trigger('files:dropped', e);
-                    };
-
-                    this.on('files:ready',   this.upload, this);
-                    this.on('files:dropped', this.filesDropped, this);
+                    this.listenTo(this.model, 'change', this.render)
                 },
+
+                render: function() {
+                  this.$el.html(this.template(this.model.toJSON()));
+                  this.$el.addClass('image');
+                  this.imageLarge  = this.$('.image_fullscreen');
+                  this.thumbnail = this.$('.thumb');
+
+                  this.imageLarge.attr('src', this.model.get('dataURL'));
+                  //this.input = this.$('.edit');
+                  return this;
+                },
+            }),
+
+            App = Backbone.View.extend({
+                el: $("#app"),
 
                 events: {
                     "click #droparea": "selectFiles",
                     "change #upload_input": "filesSelected"
                 },
 
-                selectFiles: function(e){
-                    this.uploadInput.trigger('click');
+
+                initialize: function() {
+                    var that = this;
+
+                    this.uploadInput = $('#upload_input');
+                    this.droparea = $('#droparea');
+                    this.gallery = $('#gallery');
+
+                    // Bind to drag and drop events
+                    window.ondragover = function(e) {e.preventDefault()}
+                    window.ondrop = function(e) {
+                        e.preventDefault();
+                        that.trigger('files:dropped', e);
+                    };
+
+                    this.on('files:dropped', this.filesDropped, this);
+
+                    this.listenTo(Images, 'add', this.imageAdded);
+                    this.listenTo(Images, 'thumbnailDone', this.thumbnailDone);
                 },
-                
-                // Triggered when user selects files via upload dialogue
-                filesSelected: function(e) {
-                    var files = this.uploadInput[0].files;
 
-                    e.preventDefault();
-                    this.addFiles(files);
 
-                    console.log('Added some files:', files); 
-                    this.trigger('files:ready');
-                },
+                // Callback for when the user has selected or dragged
+                // new files and they are ready to be uploaded
+                filesReady: function() {
+                    var files = _.clone(settings.file_list), file;
 
-                filesDropped: function(e) {
-                    console.log("File dropped", e);
-                    this.addFiles(e.dataTransfer.files);
-                    this.upload();
-                },
-
-                // Add files to the array of files to be uploaded
-                addFiles: function(files) {
-                    for(var i=0; i<files.length;i++) {
-                        settings.file_list.push(files[i]); 
+                    while( settings.file_list.length != 0 ) {
+                        file = files.splice(0,1)[0]; 
                     }
                 },
 
@@ -86,13 +122,66 @@ $(document).ready(function(){
                         // XXX error handling
                         xhr.send(fd);
                     }
+                },
+                
+                // CALLBACKS AND UTILITIES 
+                imageAdded: function(image) {
+                    console.log('New image added to collection', image);
+
+                    var view = new ImageView({model: image}),
+                        fr = new FileReader(),
+                        that = this;
+                    
+                    fr.onloadend = function() {
+                        image.set({
+                            dataURL: fr.result
+                        });
+
+                    }
+
+                    fr.readAsDataURL(image.get('fileObject'));
+                    this.gallery.append(view.render().el);
+                },
+
+                thumbnailDone: function(image) {
+                    console.log('Thumbnail done');
+                },
+
+                // Open browser file upload dialogue
+                selectFiles: function(e){
+                    this.uploadInput.trigger('click');
+                },
+                
+                // Callback for files selected using browser file dialogue
+                filesSelected: function(e) {
+                    var files = this.uploadInput[0].files;
+
+                    e.preventDefault();
+                    this.addFiles(files);
+
+                    console.log('Added some files:', files); 
+                },
+
+                // Callback for files flying in via drag and drop
+                filesDropped: function(e) {
+                    console.log("File dropped", e);
+                    this.addFiles(e.dataTransfer.files);
+                    this.upload();
+                },
+
+                // Add files to the array of files to be uploaded
+                addFiles: function(files) {
+                    for(var i=0; i<files.length;i++) {
+                        Images.create({ fileObject: files[i] }); 
+                    }
                 }
             });
            
             // Mix in event handling
-            _.extend(SUI, Backbone.Events);
+            _.extend(App, Backbone.Events);
 
-            SApp = new SUI;
+            window.Slimgur = new App;
+            window.Images  = Images;
 
          
         // GUI shit
@@ -134,15 +223,6 @@ $(document).ready(function(){
                 $this.find('.url_imgur').select();
             });
 
-            var Image = {
-                settings : {
-                    src: '',
-                    uri: '',
-                    binary_string: '',
-                },
-
-                upload: function() {}
-            }
         });
     })();
 });
